@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>You vs You - Trading Journal Copilot</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --accent: #2563eb;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(120deg, #1d4ed8, #0ea5e9);
+      color: #fff;
+      padding: 32px 20px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    header h1 {
+      margin: 0 0 8px 0;
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.92;
+      max-width: 720px;
+      margin-inline: auto;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    section h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      background: #fff;
+    }
+
+    textarea {
+      min-height: 64px;
+      resize: vertical;
+    }
+
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.28);
+    }
+
+    button.secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .stack { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e0e7ff;
+      color: #1e40af;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 1px solid #c7d2fe;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .table th, .table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    .table th { color: var(--muted); font-weight: 700; }
+
+    .stat-card {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #f8fafc;
+    }
+
+    .stat-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .stat-card strong { font-size: 1.4rem; }
+
+    .rule-chip {
+      background: #fef9c3;
+      color: #854d0e;
+      border-color: #fef08a;
+    }
+
+    .impact-neg { color: var(--danger); font-weight: 700; }
+    .impact-pos { color: var(--success); font-weight: 700; }
+
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>You vs You – Trading Journal Copilot</h1>
+    <p>
+      Track the rules you intend to follow, log what really happened, and compare your
+      performance to a perfect AI version of yourself that followed every rule.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Load your rulebook</h2>
+      <p class="muted">Import a <code>rules.json</code> file or add rules manually. The AI mirror will always follow this checklist.</p>
+      <div class="stack">
+        <label class="secondary">
+          <input id="rule-file" type="file" accept="application/json" style="display:none" />
+          <button id="upload-rules" type="button">Upload rules JSON</button>
+        </label>
+        <button id="add-rule" type="button" class="secondary">Add rule</button>
+        <button id="load-sample-rules" type="button" class="secondary">Load sample rules</button>
+      </div>
+      <div id="rule-form" style="display:none; margin-top:12px;" class="grid">
+        <div>
+          <label for="rule-id">Rule ID</label>
+          <input id="rule-id" type="text" placeholder="risk-01" />
+        </div>
+        <div>
+          <label for="rule-name">Name</label>
+          <input id="rule-name" type="text" placeholder="Respect max daily loss" />
+        </div>
+        <div>
+          <label for="rule-category">Category</label>
+          <input id="rule-category" type="text" placeholder="risk, execution, sizing..." />
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label for="rule-description">Description</label>
+          <textarea id="rule-description" placeholder="Stop trading when daily loss limit hits"></textarea>
+        </div>
+        <div>
+          <button id="save-rule" type="button">Save rule</button>
+        </div>
+      </div>
+      <table class="table" id="rule-table">
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Category</th><th>Description</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Log a trading day</h2>
+      <div class="grid">
+        <div>
+          <label for="trade-date">Date</label>
+          <input id="trade-date" type="date" />
+        </div>
+        <div>
+          <label for="day-notes">Day notes</label>
+          <textarea id="day-notes" placeholder="Context, emotions, market conditions..."></textarea>
+        </div>
+      </div>
+
+      <h3>Trade capture</h3>
+      <div class="grid">
+        <div>
+          <label for="symbol">Symbol</label>
+          <input id="symbol" type="text" placeholder="AAPL" />
+        </div>
+        <div>
+          <label for="actual-pnl">Actual P&L</label>
+          <input id="actual-pnl" type="number" step="0.01" placeholder="-150" />
+        </div>
+        <div>
+          <label for="planned-pnl">Perfect (planned) P&L</label>
+          <input id="planned-pnl" type="number" step="0.01" placeholder="120" />
+        </div>
+        <div>
+          <label for="violated-rules">Rules broken</label>
+          <select id="violated-rules" multiple></select>
+          <small class="muted">Select rules you <em>did not</em> follow for this trade.</small>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label for="trade-notes">Trade notes</label>
+          <textarea id="trade-notes" placeholder="Entry/exit reasoning"></textarea>
+        </div>
+        <div>
+          <button id="add-trade" type="button">Add trade</button>
+        </div>
+      </div>
+
+      <table class="table" id="trade-table" aria-label="Trades for the current day">
+        <thead>
+          <tr><th>Symbol</th><th>Actual</th><th>Perfect</th><th>Broken rules</th><th>Notes</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="stack" style="justify-content: space-between; align-items: center;">
+        <div class="muted">The AI self uses the perfect P&L for every trade with zero rule breaks.</div>
+        <div class="stack">
+          <button id="load-sample-day" class="secondary" type="button">Load sample trades</button>
+          <button id="save-day" type="button">Save day & compare</button>
+        </div>
+      </div>
+
+      <div id="day-summary" style="margin-top:14px; display:none;" class="grid">
+        <div class="stat-card">
+          <h3>Actual P&L</h3>
+          <strong id="actual-total">$0</strong>
+        </div>
+        <div class="stat-card">
+          <h3>AI (perfect) P&L</h3>
+          <strong id="perfect-total">$0</strong>
+        </div>
+        <div class="stat-card">
+          <h3>Discipline gap</h3>
+          <strong id="discipline-gap">$0</strong>
+        </div>
+      </div>
+      <div id="rule-impacts" style="display:none; margin-top:8px;"></div>
+    </section>
+
+    <section>
+      <h2>History & rollups</h2>
+      <p class="muted">Each saved day is stored locally. Compare discipline gaps by day, week, month, and year.</p>
+      <div class="stack">
+        <button id="export-journal" class="secondary" type="button">Download journal</button>
+        <label class="secondary">
+          <input id="journal-file" type="file" accept="application/json" style="display:none" />
+          <button id="import-journal" type="button">Import journal</button>
+        </label>
+      </div>
+      <table class="table" id="history-table">
+        <thead>
+          <tr><th>Date</th><th>Actual</th><th>Perfect</th><th>Gap</th><th>Notes</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="grid" id="rollups"></div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "youvsyou_journal";
+
+    const emptyState = () => ({ rules: [], days: [] });
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return emptyState();
+      try { return JSON.parse(raw); } catch { return emptyState(); }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    let state = loadState();
+    let workingTrades = [];
+
+    const els = {
+      ruleTable: document.querySelector("#rule-table tbody"),
+      tradeTable: document.querySelector("#trade-table tbody"),
+      violatedRules: document.getElementById("violated-rules"),
+      ruleForm: document.getElementById("rule-form"),
+      daySummary: document.getElementById("day-summary"),
+      ruleImpacts: document.getElementById("rule-impacts"),
+      historyTable: document.querySelector("#history-table tbody"),
+      rollups: document.getElementById("rollups"),
+      actualTotal: document.getElementById("actual-total"),
+      perfectTotal: document.getElementById("perfect-total"),
+      disciplineGap: document.getElementById("discipline-gap"),
+    };
+
+    function renderRules() {
+      els.ruleTable.innerHTML = "";
+      els.violatedRules.innerHTML = "";
+      state.rules.forEach(rule => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${rule.id}</td><td>${rule.name}</td><td>${rule.category || ""}</td><td>${rule.description || ""}</td>`;
+        els.ruleTable.appendChild(row);
+
+        const opt = document.createElement("option");
+        opt.value = rule.id;
+        opt.textContent = `${rule.id} — ${rule.name}`;
+        els.violatedRules.appendChild(opt);
+      });
+    }
+
+    function formatCurrency(value) {
+      return value.toLocaleString(undefined, { style: "currency", currency: "USD" });
+    }
+
+    function summarizeDay(day) {
+      const actual_total = day.trades.reduce((sum, t) => sum + Number(t.actual_pnl || 0), 0);
+      const perfect_total = day.trades.reduce((sum, t) => sum + Number(t.planned_pnl || 0), 0);
+      const discipline_gap = perfect_total - actual_total;
+      const rule_impacts = {};
+
+      day.trades.forEach(trade => {
+        const delta = Number(trade.planned_pnl || 0) - Number(trade.actual_pnl || 0);
+        (trade.violated_rules || []).forEach(ruleId => {
+          rule_impacts[ruleId] = (rule_impacts[ruleId] || 0) + delta;
+        });
+      });
+
+      return { ...day, actual_total, perfect_total, discipline_gap, rule_impacts };
+    }
+
+    function isoWeek(dateStr) {
+      const d = new Date(dateStr + "T00:00:00Z");
+      const target = new Date(d.valueOf());
+      const dayNr = (d.getUTCDay() + 6) % 7;
+      target.setUTCDate(target.getUTCDate() - dayNr + 3);
+      const firstThursday = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
+      const diff = target - firstThursday;
+      const week = 1 + Math.round(diff / (7 * 24 * 3600 * 1000));
+      return `${target.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+    }
+
+    function monthKey(dateStr) {
+      const d = new Date(dateStr + "T00:00:00Z");
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function yearKey(dateStr) {
+      const d = new Date(dateStr + "T00:00:00Z");
+      return `${d.getUTCFullYear()}`;
+    }
+
+    function renderTrades() {
+      els.tradeTable.innerHTML = "";
+      workingTrades.forEach(trade => {
+        const broken = trade.violated_rules?.length ? trade.violated_rules.map(r => `<span class="pill rule-chip">${r}</span>`).join(" ") : "";
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${trade.symbol}</td><td>${formatCurrency(Number(trade.actual_pnl))}</td><td>${formatCurrency(Number(trade.planned_pnl))}</td><td>${broken}</td><td>${trade.notes || ""}</td>`;
+        els.tradeTable.appendChild(row);
+      });
+    }
+
+    function renderHistory() {
+      els.historyTable.innerHTML = "";
+      state.days
+        .slice()
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .forEach(day => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${day.date}</td><td>${formatCurrency(day.actual_total)}</td><td>${formatCurrency(day.perfect_total)}</td><td>${formatCurrency(day.discipline_gap)}</td><td>${day.notes || ""}</td>`;
+          els.historyTable.appendChild(row);
+        });
+    }
+
+    function renderRollups() {
+      const roll = { day: {}, week: {}, month: {}, year: {} };
+      state.days.forEach(day => {
+        roll.day[day.date] = (roll.day[day.date] || 0) + day.discipline_gap;
+        roll.week[isoWeek(day.date)] = (roll.week[isoWeek(day.date)] || 0) + day.discipline_gap;
+        roll.month[monthKey(day.date)] = (roll.month[monthKey(day.date)] || 0) + day.discipline_gap;
+        roll.year[yearKey(day.date)] = (roll.year[yearKey(day.date)] || 0) + day.discipline_gap;
+      });
+
+      const block = (title, data) => {
+        const rows = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
+        if (!rows.length) return "<p class='muted'>No data yet.</p>";
+        return `<table class="table"><thead><tr><th>${title}</th><th>Discipline gap</th></tr></thead><tbody>${rows.map(([k,v]) => `<tr><td>${k}</td><td>${formatCurrency(v)}</td></tr>`).join("")}</tbody></table>`;
+      };
+
+      els.rollups.innerHTML = `
+        <div class="stat-card">${block("Day", roll.day)}</div>
+        <div class="stat-card">${block("Week", roll.week)}</div>
+        <div class="stat-card">${block("Month", roll.month)}</div>
+        <div class="stat-card">${block("Year", roll.year)}</div>
+      `;
+    }
+
+    function renderRuleImpacts(impacts) {
+      els.ruleImpacts.innerHTML = "";
+      const entries = Object.entries(impacts);
+      if (!entries.length) {
+        els.ruleImpacts.style.display = "none";
+        return;
+      }
+      const list = document.createElement("div");
+      list.className = "grid";
+      entries.sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+      entries.forEach(([ruleId, delta]) => {
+        const card = document.createElement("div");
+        card.className = "stat-card";
+        card.innerHTML = `<h3>${ruleId}</h3><div class="${delta < 0 ? "impact-neg" : "impact-pos"}">${formatCurrency(delta)}</div>`;
+        list.appendChild(card);
+      });
+      els.ruleImpacts.appendChild(list);
+      els.ruleImpacts.style.display = "block";
+    }
+
+    function clearTradeInputs() {
+      document.getElementById("symbol").value = "";
+      document.getElementById("actual-pnl").value = "";
+      document.getElementById("planned-pnl").value = "";
+      document.getElementById("trade-notes").value = "";
+      Array.from(els.violatedRules.options).forEach(opt => opt.selected = false);
+    }
+
+    function addTrade() {
+      const symbol = document.getElementById("symbol").value.trim();
+      const actual = parseFloat(document.getElementById("actual-pnl").value);
+      const planned = parseFloat(document.getElementById("planned-pnl").value);
+      const notes = document.getElementById("trade-notes").value.trim();
+      const violated = Array.from(els.violatedRules.selectedOptions).map(o => o.value);
+      if (!symbol) return alert("Symbol is required.");
+      if (Number.isNaN(actual) || Number.isNaN(planned)) return alert("Enter both actual and planned P&L.");
+
+      workingTrades.push({ symbol, actual_pnl: actual, planned_pnl: planned, violated_rules: violated, notes });
+      renderTrades();
+      clearTradeInputs();
+    }
+
+    function saveRule() {
+      const id = document.getElementById("rule-id").value.trim();
+      const name = document.getElementById("rule-name").value.trim();
+      const description = document.getElementById("rule-description").value.trim();
+      const category = document.getElementById("rule-category").value.trim();
+      if (!id || !name) return alert("Rule ID and name are required.");
+
+      const exists = state.rules.find(r => r.id === id);
+      if (exists && !confirm("Rule ID already exists. Overwrite?")) return;
+
+      const payload = { id, name, description, category };
+      state.rules = state.rules.filter(r => r.id !== id).concat(payload);
+      saveState(state);
+      renderRules();
+      els.ruleForm.style.display = "none";
+    }
+
+    function saveDay() {
+      const date = document.getElementById("trade-date").value;
+      const notes = document.getElementById("day-notes").value.trim();
+      if (!date) return alert("Select a trading date.");
+      if (!workingTrades.length) return alert("Add at least one trade.");
+
+      const summary = summarizeDay({ date, trades: workingTrades.slice(), notes });
+      els.actualTotal.textContent = formatCurrency(summary.actual_total);
+      els.perfectTotal.textContent = formatCurrency(summary.perfect_total);
+      els.disciplineGap.textContent = formatCurrency(summary.discipline_gap);
+      els.daySummary.style.display = "grid";
+      renderRuleImpacts(summary.rule_impacts);
+
+      state.days = state.days.filter(d => d.date !== date).concat(summary);
+      saveState(state);
+      renderHistory();
+      renderRollups();
+      workingTrades = [];
+      renderTrades();
+    }
+
+    function exportJournal() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "youvsyou_journal.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importFile(input, handler) {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          handler(data);
+        } catch (e) {
+          alert("Invalid JSON file.");
+        }
+      };
+      reader.readAsText(file);
+      input.value = "";
+    }
+
+    function loadSampleRules() {
+      fetch("../sample/rules.json")
+        .then(res => res.json())
+        .then(data => {
+          if (!Array.isArray(data.rules)) return alert("Sample rules missing 'rules' key.");
+          state.rules = data.rules;
+          saveState(state);
+          renderRules();
+        })
+        .catch(() => alert("Could not load sample rules."));
+    }
+
+    function loadSampleTrades() {
+      fetch("../sample/trades_2024-12-02.json")
+        .then(res => res.json())
+        .then(data => {
+          if (!Array.isArray(data.trades)) return alert("Sample trades missing 'trades' key.");
+          workingTrades = data.trades.map(t => ({ ...t }));
+          renderTrades();
+        })
+        .catch(() => alert("Could not load sample trades."));
+    }
+
+    document.getElementById("upload-rules").addEventListener("click", () => document.getElementById("rule-file").click());
+    document.getElementById("rule-file").addEventListener("change", (e) => importFile(e.target, data => {
+      if (!Array.isArray(data.rules)) return alert("File must include a 'rules' array.");
+      state.rules = data.rules;
+      saveState(state);
+      renderRules();
+    }));
+
+    document.getElementById("add-rule").addEventListener("click", () => {
+      els.ruleForm.style.display = els.ruleForm.style.display === "none" ? "grid" : "none";
+    });
+    document.getElementById("save-rule").addEventListener("click", saveRule);
+    document.getElementById("load-sample-rules").addEventListener("click", loadSampleRules);
+
+    document.getElementById("add-trade").addEventListener("click", addTrade);
+    document.getElementById("save-day").addEventListener("click", saveDay);
+    document.getElementById("load-sample-day").addEventListener("click", loadSampleTrades);
+
+    document.getElementById("export-journal").addEventListener("click", exportJournal);
+    document.getElementById("import-journal").addEventListener("click", () => document.getElementById("journal-file").click());
+    document.getElementById("journal-file").addEventListener("change", (e) => importFile(e.target, data => {
+      if (!Array.isArray(data.rules) || !Array.isArray(data.days)) return alert("Journal must include 'rules' and 'days'.");
+      state = data;
+      saveState(state);
+      renderRules();
+      renderHistory();
+      renderRollups();
+    }));
+
+    renderRules();
+    renderTrades();
+    renderHistory();
+    renderRollups();
+  </script>
+</body>
+</html>
