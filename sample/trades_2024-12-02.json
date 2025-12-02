@@ -1,0 +1,25 @@
+{
+  "trades": [
+    {
+      "symbol": "AAPL",
+      "actual_pnl": -150.0,
+      "planned_pnl": 120.0,
+      "violated_rules": ["setup-01"],
+      "notes": "Chased breakout before confirmation"
+    },
+    {
+      "symbol": "MSFT",
+      "actual_pnl": 320.0,
+      "planned_pnl": 320.0,
+      "violated_rules": [],
+      "notes": "Followed plan"
+    },
+    {
+      "symbol": "TSLA",
+      "actual_pnl": -75.0,
+      "planned_pnl": 0.0,
+      "violated_rules": ["risk-02"],
+      "notes": "Oversized against rule"
+    }
+  ]
+}
