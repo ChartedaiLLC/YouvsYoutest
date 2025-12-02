@@ -1,0 +1,7 @@
+{
+  "rules": [
+    {"id": "risk-01", "name": "Respect max daily loss", "description": "Stop once loss limit hit", "category": "risk"},
+    {"id": "setup-01", "name": "Trade only A-setups", "description": "Skip trades outside playbook", "category": "selection"},
+    {"id": "risk-02", "name": "1R max per trade", "description": "Keep individual trade risk contained", "category": "risk"}
+  ]
+}

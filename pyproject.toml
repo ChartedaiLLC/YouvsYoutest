@@ -1,0 +1,15 @@
+[project]
+name = "youvsyou"
+version = "0.1.0"
+description = "You vs You trading journal assistant"
+authors = [{name = "ChartedAI", email = ""}]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+youvsyou = "youvsyou.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

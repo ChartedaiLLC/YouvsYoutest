@@ -1,0 +1,22 @@
+{
+  "rules": [
+    {"id": "risk-01", "name": "Respect max daily loss", "description": "Stop once loss limit hit", "category": "risk"},
+    {"id": "setup-01", "name": "Trade only A-setups", "description": "Skip trades outside playbook", "category": "selection"},
+    {"id": "risk-02", "name": "1R max per trade", "description": "Keep individual trade risk contained", "category": "risk"}
+  ],
+  "days": [
+    {
+      "date": "2024-12-02",
+      "notes": "Example day to illustrate the workflow.",
+      "trades": [
+        {"symbol": "AAPL", "actual_pnl": -150.0, "planned_pnl": 120.0, "violated_rules": ["setup-01"], "notes": "Chased breakout before confirmation"},
+        {"symbol": "MSFT", "actual_pnl": 320.0, "planned_pnl": 320.0, "violated_rules": [], "notes": "Followed plan"},
+        {"symbol": "TSLA", "actual_pnl": -75.0, "planned_pnl": 0.0, "violated_rules": ["risk-02"], "notes": "Oversized against rule"}
+      ],
+      "actual_total": 95.0,
+      "perfect_total": 440.0,
+      "discipline_gap": 345.0,
+      "rule_impacts": {"setup-01": 270.0, "risk-02": 75.0}
+    }
+  ]
+}
